@@ -3,9 +3,36 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
+;; Theme
+;;(setq doom-theme 'doom-nord-light)
+;;(setq doom-theme 'doom-nord)
+;;(setq doom-theme 'modus-operandi-tinted)
+;; Theme switcher
+(defvar my/themes '(modus-operandi-tinted doom-nord)
+  "List of themes to cycle through.")
+
+(defvar my/current-theme-index 0
+  "Current index in `my/themes` list.")
+
+(defun my/load-theme-at-index (index)
+  "Load theme at INDEX from `my/themes`."
+  (let ((theme (nth index my/themes)))
+    (mapc #'disable-theme custom-enabled-themes)
+    (load-theme theme t)
+    (message "Switched to theme: %s" theme)))
+
+(defun my/switch-theme ()
+  "Cycle through the themes in `my/themes`."
+  (interactive)
+  (setq my/current-theme-index (% (1+ my/current-theme-index) (length my/themes)))
+  (my/load-theme-at-index my/current-theme-index))
+
+;; Load the initial theme on startup
+(my/load-theme-at-index my/current-theme-index)
+
 ;; Org-agenda
-;;(after! org
-;;  (setq org-agenda-span 30))
+(after! org
+  (setq org-agenda-span 30))
 (after! org
   (setq org-agenda-files '("/Users/yakov/Documents/03-research/emacs_org/TODO_list.org")))
 
@@ -49,7 +76,7 @@
     ;; Check for existing markup around the region
     (let ((before (buffer-substring-no-properties
                    (max (point-min) (- beg markup-len)) beg))
-          (after (buffer-substring-no-properties
+         (after (buffer-substring-no-properties
                   end (min (point-max) (+ end markup-len)))))
       (if (and (string= before markup) (string= after markup))
           ;; If already marked up, remove it
@@ -72,13 +99,6 @@
   "Toggle /italic/ formatting on region or word."
   (interactive)
   (my/org-toggle-markup "/"))
-
-;; Keybindings in Org mode: ⌘B and ⌘I
-(map! :map org-mode-map
-      :i "s-b" #'my/org-toggle-bold
-      :i "s-i" #'my/org-toggle-italic
-      :n "s-b" #'my/org-toggle-bold
-      :n "s-i" #'my/org-toggle-italic)
 
 ;; Pixel scrolling
 (pixel-scroll-precision-mode t)
@@ -112,7 +132,6 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 ;;(setq doom-theme 'doom-one)
-(setq doom-theme 'doom-nord)
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
